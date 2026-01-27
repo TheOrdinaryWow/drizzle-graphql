@@ -385,6 +385,15 @@ const generateSelectFields = <TWithOrder extends boolean>(
   return { order, filters, tableFields, relationFields } as SelectData<TWithOrder>;
 };
 
+export const aggregateCountOutput = new GraphQLObjectType({
+  name: "AggregateCount",
+  fields: {
+    count: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+  },
+});
+
 export const generateTableTypes = <WithReturning extends boolean>(
   tableName: string,
   tables: Record<string, Table>,
@@ -460,6 +469,7 @@ export const generateTableTypes = <WithReturning extends boolean>(
       ? {
           selectSingleOutput,
           selectArrOutput,
+          aggregateCountOutput,
           // biome-ignore lint/style/noNonNullAssertion: prevent ts error
           singleTableItemOutput: singleTableItemOutput!,
           // biome-ignore lint/style/noNonNullAssertion: prevent ts error
@@ -468,6 +478,7 @@ export const generateTableTypes = <WithReturning extends boolean>(
       : {
           selectSingleOutput,
           selectArrOutput,
+          aggregateCountOutput,
         }
   ) as GeneratedTableTypesOutputs<WithReturning>;
 

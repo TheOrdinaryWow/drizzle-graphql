@@ -243,11 +243,13 @@ export type GeneratedTableTypesOutputs<WithReturning extends boolean> = WithRetu
   ? {
       selectSingleOutput: GraphQLObjectType;
       selectArrOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
+      aggregateCountOutput: GraphQLObjectType;
       singleTableItemOutput: GraphQLObjectType;
       arrTableItemOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
     }
   : {
       selectSingleOutput: GraphQLObjectType;
+      aggregateCountOutput: GraphQLObjectType;
       selectArrOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
     };
 
