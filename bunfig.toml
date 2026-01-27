@@ -1,0 +1,18 @@
+[test]
+# Test file patterns - matches vitest configuration
+include = ["tests/**/*.test.ts"]
+
+# Test timeout - maintain 100 seconds like vitest (for Docker container startup)
+timeout = 100000
+
+# Test isolation (enabled by default in Bun, but being explicit)
+# equivalent to vitest's isolate: true
+
+# TypeScript support is built-in for Bun, no additional config needed
+
+# Path resolution - support @/* aliases to src/*
+# This replaces the vite-tsconfig-paths plugin functionality
+
+# Improved test runner settings
+bail = false # Don't stop on first failure
+verbose = true # Show detailed test output
