@@ -63,42 +63,42 @@
     "ts"
   ],
   "dependencies": {
-    "graphql-parse-resolve-info": "^4.13.0"
+    "graphql-parse-resolve-info": "^4.14.1"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.15.2",
-    "@babel/parser": "^7.24.1",
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@babel/parser": "^7.28.6",
     "@biomejs/biome": "2.3.13",
-    "@libsql/client": "^0.5.6",
+    "@libsql/client": "^0.17.0",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
-    "@types/dockerode": "^3.3.26",
-    "@types/pg": "^8.11.6",
-    "@types/uuid": "^9.0.8",
-    "axios": "^1.6.8",
+    "@types/dockerode": "^4.0.1",
+    "@types/pg": "^8.16.0",
+    "@types/uuid": "^11.0.0",
+    "axios": "^1.13.3",
     "bunup": "^0.16.20",
-    "dockerode": "^4.0.2",
+    "dockerode": "^4.0.9",
     "drizzle-kit": "^0.24.0",
     "drizzle-orm": "0.33.0",
     "get-port": "^7.0.0",
-    "graphql": "^16.3.0",
-    "graphql-yoga": "^5.1.1",
-    "mysql2": "^3.9.2",
+    "graphql": "^16.12.0",
+    "graphql-yoga": "^5.18.0",
+    "mysql2": "^3.16.2",
     "node-pg": "^1.0.1",
-    "pg": "^8.12.0",
-    "postgres": "^3.4.3",
-    "recast": "^0.23.6",
-    "resolve-tspaths": "^0.8.18",
+    "pg": "^8.17.2",
+    "postgres": "^3.4.8",
+    "recast": "^0.23.11",
+    "resolve-tspaths": "^0.8.23",
     "rimraf": "^6.1.2",
     "simple-git-hooks": "^2.13.1",
-    "typescript": "^5.4.2",
-    "uuid": "^9.0.1",
-    "vite-tsconfig-paths": "^4.3.2",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0",
+    "vite-tsconfig-paths": "^6.0.5",
     "vitest": "^1.4.0",
-    "zod": "^3.22.4"
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
     "drizzle-orm": ">=0.30.9",
-    "graphql": ">=16.3.0"
+    "graphql": ">=16.12.0"
   },
   "trustedDependencies": [
     "@bunup/dts"
