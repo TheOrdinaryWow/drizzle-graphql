@@ -1,5 +1,5 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { createServer, type Server } from "node:http";
-import path from "path";
 
 import { type Client, createClient } from "@libsql/client";
 import { sql } from "drizzle-orm";
@@ -7,7 +7,6 @@ import { drizzle } from "drizzle-orm/libsql";
 import type { BaseSQLiteDatabase } from "drizzle-orm/sqlite-core";
 import { GraphQLObjectType, GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildSchema, type GeneratedEntities } from "@/index";
 
@@ -33,9 +32,7 @@ beforeAll(async () => {
 
   do {
     try {
-      ctx.client = createClient({
-        url: `file://${path.join(__dirname, "/.temp/db-custom.sqlite")}`,
-      });
+      ctx.client = createClient({ url: ":memory:" });
       connected = true;
       break;
     } catch (e) {
@@ -50,9 +47,10 @@ beforeAll(async () => {
     throw lastError;
   }
 
-  ctx.db = drizzle(ctx.client, {
+  ctx.db = drizzle(ctx.client as any, {
     schema,
-    logger: process.env["LOG_SQL"] ? true : false,
+    // biome-ignore lint/complexity/useLiteralKeys: tsconfig `noUncheckedIndexedAccess`
+    logger: !!process.env["LOG_SQL"],
   });
 
   const { entities } = buildSchema(ctx.db);
@@ -104,39 +102,39 @@ beforeAll(async () => {
   ctx.gql = gql;
 });
 
-afterAll(async (t) => {
+afterAll(async (_t) => {
   ctx.client.close();
 });
 
-beforeEach(async (t) => {
-  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS \`customers\` (
-		\`id\` integer PRIMARY KEY NOT NULL,
-		\`address\` text NOT NULL,
-		\`is_confirmed\` integer,
-		\`registration_date\` integer NOT NULL,
-		\`user_id\` integer NOT NULL,
-		FOREIGN KEY (\`user_id\`) REFERENCES \`users\`(\`id\`) ON UPDATE no action ON DELETE no action
+beforeEach(async (_t) => {
+  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS customers (
+		id integer PRIMARY KEY NOT NULL,
+		address text NOT NULL,
+		is_confirmed integer,
+		registration_date integer NOT NULL,
+		user_id integer NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE no action ON DELETE no action
 	);`);
 
-  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS \`posts\` (
-		\`id\` integer PRIMARY KEY NOT NULL,
-		\`content\` text,
-		\`author_id\` integer
+  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS posts (
+		id integer PRIMARY KEY NOT NULL,
+		content text,
+		author_id integer
 	);`);
 
-  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS \`users\` (
-		\`id\` integer PRIMARY KEY NOT NULL,
-		\`name\` text NOT NULL,
-		\`email\` text,
-		\`text_json\` text,
-		\`blob_bigint\` blob,
-		\`numeric\` numeric,
-		\`created_at\` integer,
-		\`created_at_ms\` integer,
-		\`real\` real,
-		\`text\` text(255),
-		\`role\` text DEFAULT 'user',
-		\`is_confirmed\` integer
+  await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS users (
+		id integer PRIMARY KEY NOT NULL,
+		name text NOT NULL,
+		email text,
+		text_json text,
+		blob_bigint blob,
+		numeric numeric,
+		created_at integer,
+		created_at_ms integer,
+		real real,
+		text text(255),
+		role text DEFAULT 'user',
+		is_confirmed integer
 	);`);
 
   await ctx.db.insert(schema.Users).values([
@@ -217,7 +215,7 @@ beforeEach(async (t) => {
   ]);
 });
 
-afterEach(async (t) => {
+afterEach(async (_t) => {
   await ctx.db.run(sql`PRAGMA foreign_keys = OFF;`);
   await ctx.db.run(sql`DROP TABLE IF EXISTS \`customers\`;`);
   await ctx.db.run(sql`DROP TABLE IF EXISTS \`posts\`;`);
@@ -225,7 +223,7 @@ afterEach(async (t) => {
   await ctx.db.run(sql`PRAGMA foreign_keys = ON;`);
 });
 
-describe.sequential("Query tests", async () => {
+describe("Query tests", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -1505,7 +1503,7 @@ describe.sequential("Query tests", async () => {
   });
 });
 
-describe.sequential("Arguments tests", async () => {
+describe("Arguments tests", async () => {
   it("Order by", async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
