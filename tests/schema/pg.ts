@@ -1,5 +1,19 @@
 import { relations } from "drizzle-orm";
-import { boolean, char, date, geometry, integer, pgEnum, pgTable, serial, text, timestamp, varchar, vector } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  char,
+  date,
+  geometry,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  varchar,
+  vector,
+} from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["admin", "user"]);
 
@@ -8,6 +22,8 @@ export const Users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email"),
+  configArray: jsonb("config_array").$type<string[]>(),
+  configObject: jsonb("config_object").$type<{ darkMode: boolean }>(),
   birthdayString: date("birthday_string", { mode: "string" }),
   birthdayDate: date("birthday_date", { mode: "date" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),

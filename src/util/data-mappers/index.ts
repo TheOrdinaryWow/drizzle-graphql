@@ -29,11 +29,15 @@ export const remapToGraphQLCore = (
 
   if (typeof value === "object") {
     const relations = relationMap?.[tableName];
+
     if (relations?.[key]) {
       // biome-ignore lint/style/noNonNullAssertion: prevent ts error
       return remapToGraphQLSingleOutput(value, relations[key]!.targetTableName, relations[key]!.relation.referencedTable, relationMap);
     }
-    if (column.columnType === "PgGeometryObject") return value;
+
+    if (column.columnType === "PgGeometryObject" || column.columnType === "PgJsonb") {
+      return value;
+    }
 
     return JSON.stringify(value);
   }

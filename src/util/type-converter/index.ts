@@ -18,6 +18,7 @@ import {
 } from "graphql";
 
 import { capitalize } from "../case-ops";
+import { GraphQLJson } from "./GraphQLJson";
 import type { ConvertedColumn } from "./types";
 
 const allowedNameChars = /^[a-zA-Z0-9_]+$/;
@@ -66,28 +67,55 @@ const geoXyInputType = new GraphQLInputObjectType({
 const columnToGraphQLCore = (column: Column, columnName: string, tableName: string, isInput: boolean): ConvertedColumn<boolean> => {
   switch (column.dataType) {
     case "boolean":
-      return { type: GraphQLBoolean, description: "Boolean" };
+      return {
+        type: GraphQLBoolean,
+        description: "Boolean",
+      };
     case "json":
       return column.columnType === "PgGeometryObject"
         ? {
             type: isInput ? geoXyInputType : geoXyType,
             description: "Geometry points XY",
           }
-        : { type: GraphQLString, description: "JSON" };
+        : {
+            type: GraphQLJson,
+            description: "JSON",
+          };
     case "date":
-      return { type: GraphQLString, description: "Date" };
+      return {
+        type: GraphQLString,
+        description: "Date",
+      };
     case "string":
-      if (column.enumValues?.length) return { type: generateEnumCached(column, columnName, tableName) };
+      if (column.enumValues?.length)
+        return {
+          type: generateEnumCached(column, columnName, tableName),
+        };
 
-      return { type: GraphQLString, description: "String" };
+      return {
+        type: GraphQLString,
+        description: "String",
+      };
     case "bigint":
-      return { type: GraphQLString, description: "BigInt" };
+      return {
+        type: GraphQLString,
+        description: "BigInt",
+      };
     case "number":
       return is(column, PgInteger) || is(column, PgSerial) || is(column, MySqlInt) || is(column, MySqlSerial) || is(column, SQLiteInteger)
-        ? { type: GraphQLInt, description: "Integer" }
-        : { type: GraphQLFloat, description: "Float" };
+        ? {
+            type: GraphQLInt,
+            description: "Integer",
+          }
+        : {
+            type: GraphQLFloat,
+            description: "Float",
+          };
     case "buffer":
-      return { type: new GraphQLList(new GraphQLNonNull(GraphQLInt)), description: "Buffer" };
+      return {
+        type: new GraphQLList(new GraphQLNonNull(GraphQLInt)),
+        description: "Buffer",
+      };
     case "array": {
       if (column.columnType === "PgVector") {
         return {
@@ -110,10 +138,16 @@ const columnToGraphQLCore = (column: Column, columnName: string, tableName: stri
         description: `Array<${innerType.description}>`,
       };
     }
-    /**
-     * Disabled custom type support for now, since it seems unused
-     */
-    // case "custom":
+    // @ts-expect-error Intentional fallthrough
+    // biome-ignore lint/suspicious/noFallthroughSwitchClause: Intentional fallthrough
+    case "custom":
+      switch ((column as any).sqlName) {
+        case "tsvector":
+          return {
+            type: GraphQLString,
+            description: "String",
+          };
+      }
     default:
       throw new Error(`Drizzle-GraphQL Error: Type ${column.dataType} is not implemented!`);
   }
@@ -132,6 +166,7 @@ export const drizzleColumnToGraphQLType = <TColumn extends Column, TIsInput exte
   if (noDesc.find((e) => e === column.dataType)) delete typeDesc.description;
 
   if (forceNullable) return typeDesc as ConvertedColumn<TIsInput>;
+
   if (column.notNull && !(defaultIsNullable && (column.hasDefault || column.defaultFn))) {
     return {
       type: new GraphQLNonNull(typeDesc.type),
