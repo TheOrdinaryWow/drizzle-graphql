@@ -32,13 +32,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "a11y": {
-        "noSvgWithoutTitle": "off",
-        "useKeyWithClickEvents": "off",
-        "useSemanticElements": "off"
-      },
       "suspicious": {
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "noExplicitAny": "off"
       }
     },
     "includes": ["**", "!dist"]
@@ -58,12 +54,6 @@
   "json": {
     "formatter": {
       "trailingCommas": "none"
-    }
-  },
-  "css": {
-    "parser": {
-      "cssModules": true,
-      "tailwindDirectives": true
     }
   },
   "assist": {
