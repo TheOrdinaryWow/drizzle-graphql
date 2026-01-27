@@ -525,69 +525,93 @@ export const extractFiltersColumn = <TColumn extends Column>(
 
     let operator: ((...args: any[]) => SQL) | undefined;
     switch (operatorName as keyof FilterColumnOperatorsCore<TColumn>) {
-      case "eq":
+      case "eq": {
         operator = operator ?? eq;
-        break;
-      case "ne":
-        operator = operator ?? ne;
-        break;
-      case "gt":
-        operator = operator ?? gt;
-        break;
-      case "gte":
-        operator = operator ?? gte;
-        break;
-      case "lt":
-        operator = operator ?? lt;
-        break;
-      case "lte": {
-        operator = operator ?? lte;
-
         const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
         variants.push(operator(column, singleValue));
-
+        break;
+      }
+      case "ne": {
+        operator = operator ?? ne;
+        const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
+        variants.push(operator(column, singleValue));
+        break;
+      }
+      case "gt": {
+        operator = operator ?? gt;
+        const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
+        variants.push(operator(column, singleValue));
+        break;
+      }
+      case "gte": {
+        operator = operator ?? gte;
+        const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
+        variants.push(operator(column, singleValue));
+        break;
+      }
+      case "lt": {
+        operator = operator ?? lt;
+        const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
+        variants.push(operator(column, singleValue));
+        break;
+      }
+      case "lte": {
+        operator = operator ?? lte;
+        const singleValue = remapFromGraphQLCore(operatorValue, column, columnName);
+        variants.push(operator(column, singleValue));
         break;
       }
 
-      case "like":
+      case "like": {
         operator = operator ?? like;
-        break;
-      case "notLike":
-        operator = operator ?? notLike;
-        break;
-      case "ilike":
-        operator = operator ?? ilike;
-        break;
-      case "notIlike":
-        operator = operator ?? notIlike;
-
         variants.push(operator(column, operatorValue as string));
-
         break;
+      }
+      case "notLike": {
+        operator = operator ?? notLike;
+        variants.push(operator(column, operatorValue as string));
+        break;
+      }
+      case "ilike": {
+        operator = operator ?? ilike;
+        variants.push(operator(column, operatorValue as string));
+        break;
+      }
+      case "notIlike": {
+        operator = operator ?? notIlike;
+        variants.push(operator(column, operatorValue as string));
+        break;
+      }
 
-      case "inArray":
+      case "inArray": {
         operator = operator ?? inArray;
-        break;
-      case "notInArray": {
-        operator = operator ?? notInArray;
-
         if (!(operatorValue as any[]).length) {
           throw new GraphQLError(`WHERE ${columnName}: Unable to use operator ${operatorName} with an empty array!`);
         }
         const arrayValue = (operatorValue as any[]).map((val) => remapFromGraphQLCore(val, column, columnName));
-
+        variants.push(operator(column, arrayValue));
+        break;
+      }
+      case "notInArray": {
+        operator = operator ?? notInArray;
+        if (!(operatorValue as any[]).length) {
+          throw new GraphQLError(`WHERE ${columnName}: Unable to use operator ${operatorName} with an empty array!`);
+        }
+        const arrayValue = (operatorValue as any[]).map((val) => remapFromGraphQLCore(val, column, columnName));
         variants.push(operator(column, arrayValue));
         break;
       }
 
-      case "isNull":
+      case "isNull": {
         operator = operator ?? isNull;
-        break;
-      case "isNotNull":
-        operator = operator ?? isNotNull;
-
         variants.push(operator(column));
         break;
+      }
+      case "isNotNull": {
+        operator = operator ?? isNotNull;
+        variants.push(operator(column));
+        break;
+      }
     }
   }
 
