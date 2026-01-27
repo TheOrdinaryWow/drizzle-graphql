@@ -4,13 +4,12 @@
     "isolatedModules": true,
     "composite": false,
     "target": "esnext",
-    "module": "esnext",
+    "module": "es2022",
     "moduleResolution": "bundler",
-    "lib": ["es2020", "es2018", "es2017", "es7", "es6", "es5"],
+    "lib": ["es2022", "es2020", "es2018", "es2017", "es7", "es6", "es5"],
     "declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
     "declarationMap": false,
     "sourceMap": false,
-    "allowJs": true,
     "incremental": false,
     "stripInternal": true /* Disable emitting declarations that have '@internal' in their JSDoc comments. */,
     "allowSyntheticDefaultImports": true /* Allow 'import x from y' when a module doesn't have a default export. */,
@@ -35,8 +34,7 @@
     "allowUnreachableCode": false /* Disable error reporting for unreachable code. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "noErrorTruncation": true /* Disable truncating types in error messages. */,
-    "checkJs": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -44,5 +42,5 @@
     "outDir": "dist"
   },
   "exclude": ["/**/node_modules/**/*", "**/dist"],
-  "include": ["src/**/*", "drizzle.config.ts", "Tests/**/*", "Server/**/*"]
+  "include": ["src/**/*", "drizzle.config.ts", "Tests/**/*", "Server/**/*", "scripts/**/*"]
 }
