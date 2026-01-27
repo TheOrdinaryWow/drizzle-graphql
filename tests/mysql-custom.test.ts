@@ -1,3 +1,4 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { createServer, type Server } from "node:http";
 
 import Docker from "dockerode";
@@ -8,7 +9,6 @@ import { GraphQLObjectType, GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import * as mysql from "mysql2/promise";
 import { v4 as uuid } from "uuid";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildSchema, type GeneratedEntities } from "@/index";
 
@@ -29,7 +29,8 @@ interface Context {
 const ctx: Context = {} as any;
 
 async function createDockerDB(): Promise<string> {
-  const docker = (ctx.docker = new Docker());
+  ctx.docker = new Docker({ socketPath: "/var/run/docker.sock" });
+  const docker = ctx.docker;
   const port = await getPort({ port: 3307 });
   const image = "mysql:8";
 
@@ -53,7 +54,7 @@ async function createDockerDB(): Promise<string> {
   return `mysql://root:mysql@127.0.0.1:${port}/drizzle`;
 }
 
-beforeAll(async (t) => {
+beforeAll(async () => {
   const connectionString = await createDockerDB();
 
   const sleep = 1000;
@@ -79,8 +80,9 @@ beforeAll(async (t) => {
     throw lastError;
   }
 
-  ctx.db = drizzle(ctx.client, {
+  ctx.db = drizzle(ctx.client as any, {
     schema,
+    // biome-ignore lint/complexity/useLiteralKeys: tsconfig `noUncheckedIndexedAccess`
     logger: !!process.env["LOG_SQL"],
     mode: "default",
   });
@@ -132,51 +134,46 @@ beforeAll(async (t) => {
   ctx.entities = entities;
   ctx.server = server;
   ctx.gql = gql;
-});
 
-afterAll(async (t) => {
-  await ctx.client?.end().catch(console.error);
-  await ctx.mysqlContainer?.stop().catch(console.error);
-});
-
-beforeEach(async (t) => {
-  await ctx.db.execute(sql`CREATE TABLE IF NOT EXISTS \`customers\` (
-		\`id\` int AUTO_INCREMENT NOT NULL,
-		\`address\` text NOT NULL,
-		\`is_confirmed\` boolean,
-		\`registration_date\` timestamp NOT NULL DEFAULT (now()),
-		\`user_id\` int NOT NULL,
-		CONSTRAINT \`customers_id\` PRIMARY KEY(\`id\`)
+  await ctx.db.execute(sql`CREATE TABLE IF NOT EXISTS customers (
+		id int AUTO_INCREMENT NOT NULL,
+		address text NOT NULL,
+		is_confirmed boolean,
+		registration_date timestamp NOT NULL DEFAULT (now()),
+		user_id int NOT NULL,
+		CONSTRAINT customers_id PRIMARY KEY(id)
 	);`);
 
-  await ctx.db.execute(sql`CREATE TABLE IF NOT EXISTS \`posts\` (
-		\`id\` int AUTO_INCREMENT NOT NULL,
-		\`content\` text,
-		\`author_id\` int,
-		CONSTRAINT \`posts_id\` PRIMARY KEY(\`id\`)
+  await ctx.db.execute(sql`CREATE TABLE IF NOT EXISTS posts (
+		id int AUTO_INCREMENT NOT NULL,
+		content text,
+		author_id int,
+		CONSTRAINT posts_id PRIMARY KEY(id)
 	);`);
 
-  await ctx.db.execute(sql`CREATE TABLE \`users\` (
-		\`id\` int AUTO_INCREMENT NOT NULL,
-		\`name\` text NOT NULL,
-		\`email\` text,
-		\`big_int\` bigint unsigned,
-		\`birthday_string\` date,
-		\`birthday_date\` date,
-		\`created_at\` timestamp NOT NULL DEFAULT (now()),
-		\`role\` enum('admin','user'),
-		\`role1\` text,
-		\`role2\` text DEFAULT ('user'),
-		\`profession\` varchar(20),
-		\`initials\` char(2),
-		\`is_confirmed\` boolean,
-		CONSTRAINT \`users_id\` PRIMARY KEY(\`id\`)
+  await ctx.db.execute(sql`CREATE TABLE users (
+		id int AUTO_INCREMENT NOT NULL,
+		name text NOT NULL,
+		email text,
+		big_int bigint unsigned,
+		birthday_string date,
+		birthday_date date,
+		created_at timestamp NOT NULL DEFAULT (now()),
+		role enum('admin','user'),
+		role1 text,
+		role2 text DEFAULT ('user'),
+		profession varchar(20),
+		initials char(2),
+		is_confirmed boolean,
+		CONSTRAINT users_id PRIMARY KEY(id)
 	);`);
 
   await ctx.db.execute(
-    sql`ALTER TABLE \`customers\` ADD CONSTRAINT \`customers_user_id_users_id_fk\` FOREIGN KEY (\`user_id\`) REFERENCES \`users\`(\`id\`) ON DELETE no action ON UPDATE no action;`,
+    sql`ALTER TABLE customers ADD CONSTRAINT customers_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE no action ON UPDATE no action;`,
   );
+});
 
+async function insertTestData() {
   await ctx.db.insert(schema.Users).values([
     {
       id: 1,
@@ -253,17 +250,36 @@ beforeEach(async (t) => {
       userId: 2,
     },
   ]);
+}
+
+async function clearTestData() {
+  await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 0;`);
+  await ctx.db.execute(sql`DELETE FROM customers;`);
+  await ctx.db.execute(sql`DELETE FROM posts;`);
+  await ctx.db.execute(sql`DELETE FROM users;`);
+  await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 1;`);
+}
+
+beforeEach(async () => {
+  await clearTestData();
+  await insertTestData();
 });
 
-afterEach(async (t) => {
+afterEach(async () => {
+  await clearTestData();
+});
+
+afterAll(async () => {
   await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 0;`);
   await ctx.db.execute(sql`DROP TABLE IF EXISTS \`customers\` CASCADE;`);
   await ctx.db.execute(sql`DROP TABLE IF EXISTS \`posts\` CASCADE;`);
   await ctx.db.execute(sql`DROP TABLE IF EXISTS \`users\` CASCADE;`);
   await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 1;`);
+  await ctx.client?.end().catch(console.error);
+  await ctx.mysqlContainer?.stop().catch(console.error);
 });
 
-describe.sequential("Query tests", async () => {
+describe("insert", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -1563,7 +1579,7 @@ describe.sequential("Query tests", async () => {
   });
 });
 
-describe.sequential("Arguments tests", async () => {
+describe("Arguments tests", async () => {
   it("Order by", async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
