@@ -1,3 +1,4 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { createServer, type Server } from "node:http";
 
 import Docker from "dockerode";
@@ -8,7 +9,6 @@ import { GraphQLObjectType, GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import postgres, { type Sql } from "postgres";
 import { v4 as uuid } from "uuid";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildSchema, type GeneratedEntities } from "@/index";
 
@@ -29,26 +29,25 @@ interface Context {
 const ctx: Context = {} as any;
 
 async function createDockerDB(ctx: Context): Promise<string> {
-  const docker = (ctx.docker = new Docker());
+  ctx.docker = new Docker({ socketPath: "/var/run/docker.sock" });
+  const docker = ctx.docker;
   const port = await getPort({ port: 5433 });
   const image = "joshuasundance/postgis_pgvector";
 
   const pullStream = await docker.pull(image);
   await new Promise((resolve, reject) => docker.modem.followProgress(pullStream, (err) => (err ? reject(err) : resolve(err))));
 
-  const pgContainer = (ctx.pgContainer = await docker.createContainer({
+  ctx.pgContainer = await docker.createContainer({
     Image: image,
     Env: ["POSTGRES_PASSWORD=postgres", "POSTGRES_USER=postgres", "POSTGRES_DB=postgres"],
     name: `drizzle-graphql-pg-custom-tests-${uuid()}`,
     HostConfig: {
       AutoRemove: true,
-      PortBindings: {
-        "5432/tcp": [{ HostPort: `${port}` }],
-      },
+      PortBindings: { "5432/tcp": [{ HostPort: `${port}` }] },
     },
-  }));
+  });
 
-  await pgContainer.start();
+  await ctx.pgContainer.start();
 
   return `postgres://postgres:postgres@localhost:${port}/postgres`;
 }
@@ -83,9 +82,10 @@ beforeAll(async () => {
     throw lastError;
   }
 
-  ctx.db = drizzle(ctx.client, {
+  ctx.db = drizzle(ctx.client as any, {
     schema,
-    logger: process.env["LOG_SQL"] ? true : false,
+    // biome-ignore lint/complexity/useLiteralKeys: tsconfig `noUncheckedIndexedAccess`
+    logger: !!process.env["LOG_SQL"],
   });
 
   const { entities } = buildSchema(ctx.db);
@@ -283,7 +283,7 @@ afterEach(async () => {
   await ctx.db.execute(sql`DROP TABLE "customers" CASCADE;`);
   await ctx.db.execute(sql`DROP TABLE "users" CASCADE;`);
 });
-describe.sequential("Query tests", async () => {
+describe("Query tests", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -1601,7 +1601,7 @@ describe.sequential("Query tests", async () => {
   });
 });
 
-describe.sequential("Arguments tests", async () => {
+describe("Arguments tests", async () => {
   it("Order by", async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{

@@ -1,3 +1,4 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, expectTypeOf, it } from "bun:test";
 import { createServer, type Server } from "node:http";
 
 import Docker from "dockerode";
@@ -8,7 +9,6 @@ import { GraphQLInputObjectType, type GraphQLList, GraphQLNonNull, GraphQLObject
 import { createYoga } from "graphql-yoga";
 import postgres, { type Sql } from "postgres";
 import { v4 as uuid } from "uuid";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import z from "zod";
 
 import {
@@ -26,6 +26,10 @@ import {
 import * as schema from "./schema/pg";
 import { GraphQLClient } from "./util/query";
 
+/**
+ * [TODO]: pass `PostGIS` related tests
+ */
+
 interface Context {
   docker: Docker;
   pgContainer: Docker.Container;
@@ -40,26 +44,25 @@ interface Context {
 const ctx: Context = {} as any;
 
 async function createDockerDB(ctx: Context): Promise<string> {
-  const docker = (ctx.docker = new Docker());
+  ctx.docker = new Docker({ socketPath: "/var/run/docker.sock" });
+  const docker = ctx.docker;
   const port = await getPort({ port: 5432 });
   const image = "joshuasundance/postgis_pgvector";
 
   const pullStream = await docker.pull(image);
-  await new Promise((resolve, reject) => docker.modem.followProgress(pullStream, (err) => (err ? reject(err) : resolve(err))));
+  await new Promise<void>((resolve, reject) => docker.modem.followProgress(pullStream, (err) => (err ? reject(err) : resolve())));
 
-  const pgContainer = (ctx.pgContainer = await docker.createContainer({
+  ctx.pgContainer = await docker.createContainer({
     Image: image,
     Env: ["POSTGRES_PASSWORD=postgres", "POSTGRES_USER=postgres", "POSTGRES_DB=postgres"],
     name: `drizzle-graphql-pg-tests-${uuid()}`,
     HostConfig: {
       AutoRemove: true,
-      PortBindings: {
-        "5432/tcp": [{ HostPort: `${port}` }],
-      },
+      PortBindings: { "5432/tcp": [{ HostPort: `${port}` }] },
     },
-  }));
+  });
 
-  await pgContainer.start();
+  await ctx.pgContainer.start();
 
   return `postgres://postgres:postgres@localhost:${port}/postgres`;
 }
@@ -94,9 +97,10 @@ beforeAll(async () => {
     throw lastError;
   }
 
-  ctx.db = drizzle(ctx.client, {
+  ctx.db = drizzle(ctx.client as any, {
     schema,
-    logger: process.env["LOG_SQL"] ? true : false,
+    // biome-ignore lint/complexity/useLiteralKeys: tsconfig `noUncheckedIndexedAccess`
+    logger: !!process.env["LOG_SQL"],
   });
 
   const { schema: gqlSchema, entities } = buildSchema(ctx.db);
@@ -263,7 +267,7 @@ afterEach(async () => {
   await ctx.db.execute(sql`DROP TABLE "users" CASCADE;`);
 });
 
-describe.sequential("Query tests", async () => {
+describe("Query tests", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -1599,7 +1603,7 @@ describe.sequential("Query tests", async () => {
 							x: 20
 							y: 20.3
 						}
-						geoTuple: [20, 20.3]		
+						geoTuple: [20, 20.3]
 					}
 				) {
 					a
@@ -1835,7 +1839,7 @@ describe.sequential("Query tests", async () => {
   });
 });
 
-describe.sequential("Arguments tests", async () => {
+describe("Aliased query tests", async () => {
   it("Order by", async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -2288,7 +2292,7 @@ describe.sequential("Arguments tests", async () => {
   });
 });
 
-describe.sequential("Returned data tests", () => {
+describe("Returned data tests", async () => {
   it("Schema", () => {
     expect(ctx.schema instanceof GraphQLSchema).toBe(true);
   });
@@ -2702,7 +2706,7 @@ describe.sequential("Returned data tests", () => {
   });
 });
 
-describe.sequential("Type tests", () => {
+describe("Type tests", async () => {
   it("Schema", () => {
     expectTypeOf(ctx.schema).toEqualTypeOf<GraphQLSchema>();
   });
@@ -2948,7 +2952,7 @@ describe.sequential("Type tests", () => {
   });
 });
 
-describe.sequential("__typename only tests", async () => {
+describe("__typename only tests", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
@@ -3316,7 +3320,7 @@ describe.sequential("__typename only tests", async () => {
     });
   });
 });
-describe.sequential("__typename with data tests", async () => {
+describe("__typename with data tests", async () => {
   it(`Select single`, async () => {
     const res = await ctx.gql.queryGql(/* GraphQL */ `
 			{
