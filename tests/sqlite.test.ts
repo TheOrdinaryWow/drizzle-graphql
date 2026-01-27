@@ -78,13 +78,7 @@ beforeAll(async () => {
   ctx.entities = entities;
   ctx.server = server;
   ctx.gql = gql;
-});
 
-afterAll(async () => {
-  ctx.client.close();
-});
-
-beforeEach(async () => {
   await ctx.db.run(sql`CREATE TABLE IF NOT EXISTS customers (
 		id integer PRIMARY KEY NOT NULL,
 		address text NOT NULL,
@@ -114,7 +108,9 @@ beforeEach(async () => {
 		role text DEFAULT 'user',
 		is_confirmed integer
 	);`);
+});
 
+async function insertTestData() {
   await ctx.db.insert(schema.Users).values([
     {
       id: 1,
@@ -191,14 +187,30 @@ beforeEach(async () => {
       userId: 2,
     },
   ]);
+}
+
+async function clearTestData() {
+  await ctx.db.run(sql`DELETE FROM customers;`);
+  await ctx.db.run(sql`DELETE FROM posts;`);
+  await ctx.db.run(sql`DELETE FROM users;`);
+}
+
+beforeEach(async () => {
+  await clearTestData();
+  await insertTestData();
 });
 
 afterEach(async () => {
+  await clearTestData();
+});
+
+afterAll(async () => {
   await ctx.db.run(sql`PRAGMA foreign_keys = OFF;`);
   await ctx.db.run(sql`DROP TABLE IF EXISTS \`customers\`;`);
   await ctx.db.run(sql`DROP TABLE IF EXISTS \`posts\`;`);
   await ctx.db.run(sql`DROP TABLE IF EXISTS \`users\`;`);
   await ctx.db.run(sql`PRAGMA foreign_keys = ON;`);
+  ctx.client.close();
 });
 
 describe("Query tests", async () => {

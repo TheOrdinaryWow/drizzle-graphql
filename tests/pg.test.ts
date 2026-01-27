@@ -127,14 +127,7 @@ beforeAll(async () => {
 	   	END $$;
 		`,
   );
-});
 
-afterAll(async () => {
-  await ctx.client?.end().catch(console.error);
-  await ctx.pgContainer?.stop().catch(console.error);
-});
-
-beforeEach(async () => {
   await ctx.db.execute(
     sql`CREATE TABLE IF NOT EXISTS "customers" (
 			"id" serial PRIMARY KEY NOT NULL,
@@ -176,7 +169,9 @@ beforeEach(async () => {
 			WHEN duplicate_object THEN null;
 		END $$;
    `);
+});
 
+async function insertTestData() {
   await ctx.db.insert(schema.Users).values([
     {
       a: [1, 5, 10, 25, 40],
@@ -259,12 +254,29 @@ beforeEach(async () => {
       userId: 2,
     },
   ]);
+}
+
+async function clearTestData() {
+  await ctx.db.execute(sql`DELETE FROM "customers";`);
+  await ctx.db.execute(sql`DELETE FROM "posts";`);
+  await ctx.db.execute(sql`DELETE FROM "users";`);
+}
+
+beforeEach(async () => {
+  await clearTestData();
+  await insertTestData();
 });
 
 afterEach(async () => {
+  await clearTestData();
+});
+
+afterAll(async () => {
   await ctx.db.execute(sql`DROP TABLE "posts" CASCADE;`);
   await ctx.db.execute(sql`DROP TABLE "customers" CASCADE;`);
   await ctx.db.execute(sql`DROP TABLE "users" CASCADE;`);
+  await ctx.client?.end().catch(console.error);
+  await ctx.pgContainer?.stop().catch(console.error);
 });
 
 describe("Query tests", async () => {
