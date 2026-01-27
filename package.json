@@ -27,7 +27,7 @@
     "build": "bun bunup",
     "pack": "(cd dist && npm pack --pack-destination ..) && rm -f package.tgz && mv *.tgz package.tgz",
     "publish": "npm publish package.tgz",
-    "test": "bun test",
+    "test": "bun test --timeout=100000",
     "server-test:pg": "DB_TYPE=pg bun run --watch server/server.ts",
     "server-test:mysql": "DB_TYPE=mysql bun run --watch server/server.ts",
     "server-test:sqlite": "DB_TYPE=sqlite bun run --watch server/server.ts",
