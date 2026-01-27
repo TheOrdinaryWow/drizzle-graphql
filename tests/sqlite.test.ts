@@ -206,9 +206,9 @@ afterEach(async () => {
 
 afterAll(async () => {
   await ctx.db.run(sql`PRAGMA foreign_keys = OFF;`);
-  await ctx.db.run(sql`DROP TABLE IF EXISTS \`customers\`;`);
-  await ctx.db.run(sql`DROP TABLE IF EXISTS \`posts\`;`);
-  await ctx.db.run(sql`DROP TABLE IF EXISTS \`users\`;`);
+  await ctx.db.run(sql`DROP TABLE IF EXISTS customers;`);
+  await ctx.db.run(sql`DROP TABLE IF EXISTS posts;`);
+  await ctx.db.run(sql`DROP TABLE IF EXISTS users;`);
   await ctx.db.run(sql`PRAGMA foreign_keys = ON;`);
   ctx.client.close();
 });

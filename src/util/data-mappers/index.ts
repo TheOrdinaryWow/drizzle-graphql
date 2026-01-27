@@ -96,11 +96,19 @@ export const remapFromGraphQLCore = (value: any, column: Column, columnName: str
     case "json": {
       if (column.columnType === "PgGeometryObject") return value;
 
-      try {
-        return JSON.parse(value);
-      } catch (e) {
-        throw new GraphQLError(`Invalid JSON in field '${columnName}':\n${e instanceof Error ? e.message : "Unknown error"}`);
+      if (typeof value === "object" && value !== null) {
+        return value;
       }
+
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value);
+        } catch (e) {
+          throw new GraphQLError(`Invalid JSON in field '${columnName}':\n${e instanceof Error ? e.message : "Unknown error"}`);
+        }
+      }
+
+      return value;
     }
 
     case "array": {

@@ -135,6 +135,8 @@ beforeAll(async () => {
   ctx.server = server;
   ctx.gql = gql;
 
+  await ctx.db.execute(sql`SET time_zone = '+00:00';`);
+
   await ctx.db.execute(sql`CREATE TABLE IF NOT EXISTS customers (
 		id int AUTO_INCREMENT NOT NULL,
 		address text NOT NULL,
@@ -157,7 +159,7 @@ beforeAll(async () => {
 		email text,
 		big_int bigint unsigned,
 		birthday_string date,
-		birthday_date date,
+		birthday_date timestamp,
 		created_at timestamp NOT NULL DEFAULT (now()),
 		role enum('admin','user'),
 		role1 text,
@@ -181,8 +183,8 @@ async function insertTestData() {
       email: "userOne@notmail.com",
       bigint: BigInt(10),
       birthdayString: "2024-04-02",
-      birthdayDate: new Date("2024-04-02T06:44:41.785Z"),
-      createdAt: new Date("2024-04-02T06:44:41.785Z"),
+      birthdayDate: new Date("2024-04-02T00:00:00.000Z"),
+      createdAt: new Date("2024-04-02T00:00:00.000Z"),
       role: "admin",
       roleText: null,
       profession: "FirstUserProf",
@@ -192,12 +194,12 @@ async function insertTestData() {
     {
       id: 2,
       name: "SecondUser",
-      createdAt: new Date("2024-04-02T06:44:41.785Z"),
+      createdAt: new Date("2024-04-02T00:00:00.000Z"),
     },
     {
       id: 5,
       name: "FifthUser",
-      createdAt: new Date("2024-04-02T06:44:41.785Z"),
+      createdAt: new Date("2024-04-02T00:00:00.000Z"),
     },
   ]);
 
@@ -271,9 +273,9 @@ afterEach(async () => {
 
 afterAll(async () => {
   await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 0;`);
-  await ctx.db.execute(sql`DROP TABLE IF EXISTS \`customers\` CASCADE;`);
-  await ctx.db.execute(sql`DROP TABLE IF EXISTS \`posts\` CASCADE;`);
-  await ctx.db.execute(sql`DROP TABLE IF EXISTS \`users\` CASCADE;`);
+  await ctx.db.execute(sql`DROP TABLE IF EXISTS customers CASCADE;`);
+  await ctx.db.execute(sql`DROP TABLE IF EXISTS posts CASCADE;`);
+  await ctx.db.execute(sql`DROP TABLE IF EXISTS users CASCADE;`);
   await ctx.db.execute(sql`SET FOREIGN_KEY_CHECKS = 1;`);
   await ctx.client?.end().catch(console.error);
   await ctx.mysqlContainer?.stop().catch(console.error);
@@ -316,7 +318,7 @@ describe("insert", async () => {
           bigint: "10",
           birthdayString: "2024-04-02",
           birthdayDate: "2024-04-02T00:00:00.000Z",
-          createdAt: "2024-04-02T06:44:42.000Z",
+          createdAt: "2024-04-02T00:00:00.000Z",
           role: "admin",
           roleText: null,
           roleText2: "user",
@@ -370,7 +372,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -385,7 +387,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -400,7 +402,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -501,7 +503,7 @@ describe("insert", async () => {
           bigint: "10",
           birthdayString: "2024-04-02",
           birthdayDate: "2024-04-02T00:00:00.000Z",
-          createdAt: "2024-04-02T06:44:42.000Z",
+          createdAt: "2024-04-02T00:00:00.000Z",
           role: "admin",
           roleText: null,
           roleText2: "user",
@@ -543,7 +545,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -613,7 +615,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -650,7 +652,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -666,7 +668,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -699,7 +701,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -719,7 +721,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -739,7 +741,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -759,7 +761,7 @@ describe("insert", async () => {
               bigint: null,
               birthdayString: null,
               birthdayDate: null,
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: null,
               roleText: null,
               roleText2: "user",
@@ -779,7 +781,7 @@ describe("insert", async () => {
               bigint: null,
               birthdayString: null,
               birthdayDate: null,
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: null,
               roleText: null,
               roleText2: "user",
@@ -799,7 +801,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -857,7 +859,7 @@ describe("insert", async () => {
           bigint: "10",
           birthdayString: "2024-04-02",
           birthdayDate: "2024-04-02T00:00:00.000Z",
-          createdAt: "2024-04-02T06:44:42.000Z",
+          createdAt: "2024-04-02T00:00:00.000Z",
           role: "admin",
           roleText: null,
           roleText2: "user",
@@ -919,7 +921,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -934,7 +936,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -949,7 +951,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -1058,7 +1060,7 @@ describe("insert", async () => {
           bigint: "10",
           birthdayString: "2024-04-02",
           birthdayDate: "2024-04-02T00:00:00.000Z",
-          createdAt: "2024-04-02T06:44:42.000Z",
+          createdAt: "2024-04-02T00:00:00.000Z",
           role: "admin",
           roleText: null,
           roleText2: "user",
@@ -1100,7 +1102,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -1178,7 +1180,7 @@ describe("insert", async () => {
             bigint: "10",
             birthdayString: "2024-04-02",
             birthdayDate: "2024-04-02T00:00:00.000Z",
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: "admin",
             roleText: null,
             roleText2: "user",
@@ -1215,7 +1217,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -1231,7 +1233,7 @@ describe("insert", async () => {
             bigint: null,
             birthdayString: null,
             birthdayDate: null,
-            createdAt: "2024-04-02T06:44:42.000Z",
+            createdAt: "2024-04-02T00:00:00.000Z",
             role: null,
             roleText: null,
             roleText2: "user",
@@ -1264,7 +1266,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -1284,7 +1286,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -1304,7 +1306,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -1324,7 +1326,7 @@ describe("insert", async () => {
               bigint: null,
               birthdayString: null,
               birthdayDate: null,
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: null,
               roleText: null,
               roleText2: "user",
@@ -1344,7 +1346,7 @@ describe("insert", async () => {
               bigint: null,
               birthdayString: null,
               birthdayDate: null,
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: null,
               roleText: null,
               roleText2: "user",
@@ -1364,7 +1366,7 @@ describe("insert", async () => {
               bigint: "10",
               birthdayString: "2024-04-02",
               birthdayDate: "2024-04-02T00:00:00.000Z",
-              createdAt: "2024-04-02T06:44:42.000Z",
+              createdAt: "2024-04-02T00:00:00.000Z",
               role: "admin",
               roleText: null,
               roleText2: "user",
@@ -1388,8 +1390,8 @@ describe("insert", async () => {
 						email: "userThree@notmail.com"
 						bigint: "15"
 						birthdayString: "2024-04-02"
-						birthdayDate: "2024-04-02T06:44:41.785Z"
-						createdAt: "2024-04-02T06:44:41.785Z"
+						birthdayDate: "2024-04-02T00:00:00.000Z"
+						createdAt: "2024-04-02T00:00:00.000Z"
 						role: admin
 						roleText: null
 						profession: "ThirdUserProf"
@@ -1420,7 +1422,7 @@ describe("insert", async () => {
         bigint: BigInt(15),
         birthdayString: "2024-04-02",
         birthdayDate: new Date("2024-04-02T00:00:00.000Z"),
-        createdAt: new Date("2024-04-02T06:44:42.000Z"),
+        createdAt: new Date("2024-04-02T00:00:00.000Z"),
         role: "admin",
         roleText: null,
         roleText2: "user",
@@ -1442,8 +1444,8 @@ describe("insert", async () => {
 							email: "userThree@notmail.com"
 							bigint: "15"
 							birthdayString: "2024-04-02"
-							birthdayDate: "2024-04-02T06:44:41.785Z"
-							createdAt: "2024-04-02T06:44:41.785Z"
+							birthdayDate: "2024-04-02T00:00:00.000Z"
+							createdAt: "2024-04-02T00:00:00.000Z"
 							role: admin
 							roleText: null
 							profession: "ThirdUserProf"
@@ -1493,7 +1495,7 @@ describe("insert", async () => {
         bigint: BigInt(15),
         birthdayString: "2024-04-02",
         birthdayDate: new Date("2024-04-02T00:00:00.000Z"),
-        createdAt: new Date("2024-04-02T06:44:42.000Z"),
+        createdAt: new Date("2024-04-02T00:00:00.000Z"),
         role: "admin",
         roleText: null,
         roleText2: "user",
