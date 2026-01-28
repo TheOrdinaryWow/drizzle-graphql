@@ -2,6 +2,20 @@
 
 Automatically create GraphQL schema or customizable schema config fields from Drizzle ORM schema
 
+## Modifications and Maintenance
+
+This repository is a fork of the original [drizzle-orm/drizzle-graphql](https://github.com/drizzle-team/drizzle-graphql). Since the original repository is no longer actively maintained, I have taken the initiative to continue its development and maintenance. Contributions and feedback from the community are welcomed to help improve this project.
+
+### Features in this fork:
+
+* Add "Count" to generated types for count queries (PostgreSQL only for now!)
+
+### Fixes in this fork:
+
+* Fix handling of JSONB
+* Fix handling of tsvector types
+* Fix handling of generated columns
+
 ## Usage
 
 -   Pass your drizzle database instance and schema into builder to generate `{ schema, entities }` object
@@ -12,7 +26,7 @@ Automatically create GraphQL schema or customizable schema config fields from Dr
     ```Typescript
     import { createServer } from 'node:http'
     import { createYoga } from 'graphql-yoga'
-    import { buildSchema } from 'drizzle-graphql'
+    import { buildSchema } from '@woooow/drizzle-graphql'
 
     // db - your drizzle instance
     import { db } from './database'
@@ -32,7 +46,7 @@ Automatically create GraphQL schema or customizable schema config fields from Dr
     import { createServer } from 'node:http'
     import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql'
     import { createYoga } from 'graphql-yoga'
-    import { buildSchema } from 'drizzle-graphql'
+    import { buildSchema } from '@woooow/drizzle-graphql'
 
     // Schema contains 'Users' and 'Customers' tables
     import { db } from './database'
