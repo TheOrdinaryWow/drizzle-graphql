@@ -1,7 +1,7 @@
 {
   "name": "@woooow/drizzle-graphql",
   "description": "Automatically generate GraphQL schema or customizable schema config fields from Drizzle ORM schema",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "type": "module",
   "files": [
     "dist"
