@@ -25,6 +25,54 @@ import {
 
 import type { CreatedResolver, Filters, TableNamedRelations, TableSelectArgs } from "./types";
 
+const generateAggregateCount = (
+  db: PgDatabase<any, any, any>,
+  tableName: string,
+  tables: Record<string, Table>,
+  _relationMap: Record<string, Record<string, TableNamedRelations>>,
+  filterArgs: GraphQLInputObjectType,
+): CreatedResolver => {
+  const queryName = `${uncapitalize(tableName)}Count`;
+  const table = tables[tableName];
+  if (!table) {
+    throw new Error(
+      `Drizzle-GraphQL Error: Table ${tableName} not found in drizzle instance. Did you forget to pass schema to drizzle constructor?`,
+    );
+  }
+
+  const queryArgs = {
+    where: {
+      type: filterArgs,
+    },
+  } as GraphQLFieldConfigArgumentMap;
+
+  const _typeName = `${capitalize(queryName)}`;
+
+  return {
+    name: queryName,
+    resolver: async (_source, args: Partial<TableSelectArgs>, _context, info) => {
+      try {
+        const { where } = args;
+
+        const _parsedInfo = parseResolveInfo(info, {
+          deep: true,
+        }) as ResolveTree;
+
+        const count = await db.$count(table, where ? extractFilters(table, tableName, where) : undefined);
+
+        return { count };
+      } catch (e) {
+        if (typeof e === "object" && typeof (<any>e).message === "string") {
+          throw new GraphQLError((<any>e).message);
+        }
+
+        throw e;
+      }
+    },
+    args: queryArgs,
+  };
+};
+
 const generateSelectArray = (
   db: PgDatabase<any, any, any>,
   tableName: string,
@@ -424,8 +472,9 @@ export const generateSchemaData = <TDrizzleInstance extends PgDatabase<any, any,
 
   for (const [tableName, tableTypes] of Object.entries(gqlSchemaTypes)) {
     const { insertInput, updateInput, tableFilters, tableOrder } = tableTypes.inputs;
-    const { selectSingleOutput, selectArrOutput, singleTableItemOutput, arrTableItemOutput } = tableTypes.outputs;
+    const { aggregateCountOutput, selectSingleOutput, selectArrOutput, singleTableItemOutput, arrTableItemOutput } = tableTypes.outputs;
 
+    const countGenerated = generateAggregateCount(db, tableName, tables, namedRelations, tableFilters);
     const selectArrGenerated = generateSelectArray(db, tableName, tables, namedRelations, tableOrder, tableFilters);
     const selectSingleGenerated = generateSelectSingle(db, tableName, tables, namedRelations, tableOrder, tableFilters);
     const insertArrGenerated = generateInsertArray(db, tableName, schema[tableName] as PgTable, insertInput);
@@ -433,6 +482,11 @@ export const generateSchemaData = <TDrizzleInstance extends PgDatabase<any, any,
     const updateGenerated = generateUpdate(db, tableName, schema[tableName] as PgTable, updateInput, tableFilters);
     const deleteGenerated = generateDelete(db, tableName, schema[tableName] as PgTable, tableFilters);
 
+    queries[countGenerated.name] = {
+      type: aggregateCountOutput,
+      args: countGenerated.args,
+      resolve: countGenerated.resolver,
+    };
     queries[selectArrGenerated.name] = {
       type: selectArrOutput,
       args: selectArrGenerated.args,

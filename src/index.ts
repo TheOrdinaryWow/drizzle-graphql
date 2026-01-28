@@ -5,9 +5,8 @@ import { BaseSQLiteDatabase } from "drizzle-orm/sqlite-core";
 import { type GraphQLFieldConfig, type GraphQLInputObjectType, GraphQLObjectType, GraphQLSchema, type GraphQLSchemaConfig } from "graphql";
 import type { ObjMap } from "graphql/jsutils/ObjMap";
 
+import type { AnyDrizzleDB, BuildSchemaConfig, GeneratedData } from "@/types";
 import { generateMySQL, generatePG, generateSQLite } from "@/util/builders";
-
-import type { AnyDrizzleDB, BuildSchemaConfig, GeneratedData } from "./types";
 
 export const buildSchema = <TDbClient extends AnyDrizzleDB<any>>(db: TDbClient, config?: BuildSchemaConfig): GeneratedData<TDbClient> => {
   const schema = db._.fullSchema;

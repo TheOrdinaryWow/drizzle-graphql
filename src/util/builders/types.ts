@@ -241,15 +241,15 @@ export type GeneratedTableTypesInputs = {
 
 export type GeneratedTableTypesOutputs<WithReturning extends boolean> = WithReturning extends true
   ? {
+      aggregateCountOutput: GraphQLObjectType;
       selectSingleOutput: GraphQLObjectType;
       selectArrOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
-      aggregateCountOutput: GraphQLObjectType;
       singleTableItemOutput: GraphQLObjectType;
       arrTableItemOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
     }
   : {
-      selectSingleOutput: GraphQLObjectType;
       aggregateCountOutput: GraphQLObjectType;
+      selectSingleOutput: GraphQLObjectType;
       selectArrOutput: GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLObjectType>>>;
     };
 
