@@ -6,20 +6,26 @@ Automatically create GraphQL schema or customizable schema config fields from Dr
 
 This repository is a fork of the original [drizzle-orm/drizzle-graphql](https://github.com/drizzle-team/drizzle-graphql). Since the original repository is no longer actively maintained, I have taken the initiative to continue its development and maintenance. Contributions and feedback from the community are welcomed to help improve this project.
 
+For personal opinions, I've migrated whole stack from `npm`, `pnpm` to `bun` as well as other tooling changes mentioned below.
+
 ### Features in this fork:
 
 * Add "Count" to generated types for count queries (PostgreSQL only for now!)
-
-### Fixes in this fork:
-
 * Fix handling of JSONB
 * Fix handling of tsvector types
 * Fix handling of generated columns
+* Export essential functions for external usage
+
+### Changes in the toolchain:
+
+* Replace `vitest` with `bun:test` for testing
+* Replace `tsup` with `bunup` for building
+* Use `biomejs` for linting and formatting
 
 ## Usage
 
 -   Pass your drizzle database instance and schema into builder to generate `{ schema, entities }` object
--   Use `schema` if pre-built schema already satisfies all your neeeds. It's compatible witn any server that consumes `GraphQLSchema` class instance
+-   Use `schema` if pre-built schema already satisfies all your needs. It's compatible witn any server that consumes `GraphQLSchema` class instance
 
     Example: hosting schema using [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server)
 
@@ -98,3 +104,10 @@ This repository is a fork of the original [drizzle-orm/drizzle-graphql](https://
         console.info('Server is running on http://localhost:4000/graphql')
     })
     ```
+
+## Acknowledgements
+
+This project builds upon the excellent work from multiple sources:
+
+- **[drizzle-team/drizzle-graphql](https://github.com/drizzle-team/drizzle-graphql)** - The original implementation that served as the foundation for this project
+- **[TimMensch/drizzle-graphql](https://github.com/TimMensch/drizzle-graphql)** - Significant portions of code and improvements were adapted from this fork
