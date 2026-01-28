@@ -10,22 +10,12 @@ export const GraphQLJson = new GraphQLScalarType({
     return value;
   },
   parseLiteral(ast) {
-    if (ast.kind === Kind.STRING) {
-      try {
-        return JSON.parse(ast.value);
-      } catch {
-        try {
-          const trimmed = ast.value.trim();
-          if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return JSON.parse(trimmed);
-          }
-          if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-            return JSON.parse(trimmed);
-          }
-        } catch {}
-        return ast.value;
-      }
+    if (ast.kind !== Kind.STRING) return null;
+
+    try {
+      return JSON.parse(ast.value);
+    } catch {
+      return ast.value;
     }
-    return null;
   },
 });
