@@ -1,7 +1,7 @@
 {
-  "name": "drizzle-graphql",
+  "name": "@woooow/drizzle-graphql",
   "description": "Automatically generate GraphQL schema or customizable schema config fields from Drizzle ORM schema",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "type": "module",
   "files": [
     "dist"
@@ -25,8 +25,8 @@
   "author": "Drizzle Team",
   "scripts": {
     "build": "bun bunup",
-    "pack": "(cd dist && npm pack --pack-destination ..) && rm -f package.tgz && mv *.tgz package.tgz",
-    "publish": "npm publish package.tgz",
+    "pack": "bun pm pack --filename package.tgz",
+    "publish": "bun publish package.tgz --access public",
     "test": "bun test --timeout=100000",
     "server-test:pg": "DB_TYPE=pg bun run --watch server/server.ts",
     "server-test:mysql": "DB_TYPE=mysql bun run --watch server/server.ts",
@@ -36,7 +36,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check --write",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist package.tgz"
   },
   "license": "Apache-2.0",
   "sideEffects": false,

@@ -1,5 +1,3 @@
-import { copyFileSync } from "node:fs";
-
 import { defineConfig } from "bunup";
 
 export default defineConfig({
@@ -14,8 +12,4 @@ export default defineConfig({
   preferredTsconfig: "./tsconfig.build.json",
   report: { gzip: false },
   outDir: "dist",
-  onSuccess: () => {
-    copyFileSync("package.json", "dist/package.json");
-    copyFileSync("README.md", "dist/README.md");
-  },
 });
