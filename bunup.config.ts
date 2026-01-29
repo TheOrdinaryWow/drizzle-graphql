@@ -12,5 +12,6 @@ export default defineConfig({
   clean: true,
   preferredTsconfig: "./tsconfig.build.json",
   report: { gzip: false },
+  exports: { includePackageJson: false },
   outDir: "dist",
 });

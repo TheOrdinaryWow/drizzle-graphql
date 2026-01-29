@@ -29,8 +29,7 @@
         "types": "./dist/builders.d.cts",
         "default": "./dist/builders.cjs"
       }
-    },
-    "./package.json": "./package.json"
+    }
   },
   "author": "Drizzle Team",
   "scripts": {
