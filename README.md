@@ -14,7 +14,7 @@ For personal opinions, I've migrated whole stack from `npm`, `pnpm` to `bun` as 
 * Fix handling of JSONB
 * Fix handling of tsvector types
 * Fix handling of generated columns
-* Export essential functions for external usage
+* Export essential builder functions for external usage
 
 ### Changes in the toolchain:
 

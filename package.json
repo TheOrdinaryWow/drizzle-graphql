@@ -20,6 +20,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./builders": {
+      "import": {
+        "types": "./dist/builders.d.ts",
+        "default": "./dist/builders.js"
+      },
+      "require": {
+        "types": "./dist/builders.d.cts",
+        "default": "./dist/builders.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "author": "Drizzle Team",
