@@ -109,5 +109,8 @@
   },
   "trustedDependencies": [
     "@bunup/dts"
-  ]
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
