@@ -8,7 +8,11 @@ export default defineConfig({
   sourcemap: "linked",
   minify: false,
   splitting: false,
-  dts: true,
+  // resolve path alias for dts generation
+  dts: {
+    inferTypes: true,
+    resolve: [/^@\//],
+  },
   clean: true,
   preferredTsconfig: "./tsconfig.build.json",
   report: { gzip: false },
