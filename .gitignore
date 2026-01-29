@@ -3,16 +3,8 @@ dist
 *.sqlite
 drizzle.config.ts
 *.tgz
-temp.ts
-dist-dts
-dist.new
 server
-runMysql.ts
-runMysql-old.ts
-runPg.ts
 tests/.temp
 tests/Migrations
 .DS_Store
-drizzle.test-heavy.ts
-changes.md
 tests/isolated.test.ts
